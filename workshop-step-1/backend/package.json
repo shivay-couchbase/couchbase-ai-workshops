@@ -1,0 +1,26 @@
+{
+  "name": "workshop-step-1-backend",
+  "version": "1.0.0",
+  "description": "Backend for Workshop Step 1 - Simple Chatbot with OpenAI API",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "openai": "^5.20.3",
+    "undici": "^7.16.0"
+  },
+  "keywords": [
+    "chatbot",
+    "openai",
+    "ai",
+    "workshop"
+  ],
+  "author": "",
+  "license": "MIT"
+}
