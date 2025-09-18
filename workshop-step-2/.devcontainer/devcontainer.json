@@ -1,0 +1,16 @@
+{
+    "name": "Couchbase Vector Search Node.js Workshop",
+    "image": "mcr.microsoft.com/devcontainers/javascript-node:0-20",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "couchbase.vscode-couchbase"
+            ]
+        }
+    },
+"postCreateCommand": "npm install && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && PATH=\"$HOME/.cargo/bin:$PATH\" && git clone https://github.com/couchbaselabs/couchbase-shell.git && cd couchbase-shell && cargo build",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {}
+    }
+}
+
