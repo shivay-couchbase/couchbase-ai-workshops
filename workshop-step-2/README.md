@@ -37,6 +37,27 @@ Once you have created an account, you can create a new Couchbase cluster by foll
 
 2. Choose a cloud provider, name and region for your cluster and click on the "Create Cluster" button.
 
+## Create an API Key
+
+After creating a cluster, you can create an API Key. This will be used by Couchbase Shell for various cluster management operations.
+
+1. Go to Organization Setting.
+
+2. Click on "API Keys", "Generate Key"
+
+3. Choose a Key Name, enter a description to remember why you created the key, check all Organization Roles and click on "Generate Key".
+
+4. Make sure you copy the API Key and API Secret
+
+
+
+## Configure Couchbase Shell
+
+clusters | clusters get $in.0.name | cb-env register $in.name $in."connection string" --capella-organization (organizations | get 0 | get name ) --project (projects | get 0 | get name ) --save --default-bucket bot --default-scope public --username cbsh --password Couch123#
+
+credentials create --read --write --username cbsh --password Couch123# 
+
+
 ## Create a Bucket
 
 After creating a cluster, you can create a new bucket by following the steps below:

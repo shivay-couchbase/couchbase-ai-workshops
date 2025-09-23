@@ -7,3 +7,9 @@ user-display-name = "" # Your display name here
 username = "" # Replace this with username from cluster access credentials
 password = "" # Replace this with password from cluster access credentials
 default-bucket = "" # Replace this with the name of the bucket you want to use
+
+[[capella-organization]]
+identifier = "yourorg"
+access-key = "xxx"
+secret-key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+default-project = "Your Project"
