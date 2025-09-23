@@ -49,16 +49,34 @@ After creating a cluster, you can create an API Key. This will be used by Couchb
 
 4. Make sure you copy the API Key and API Secret
 
-
-
 ## Configure Couchbase Shell
 
-clusters | clusters get $in.0.name | cb-env register $in.name $in."connection string" --capella-organization (organizations | get 0 | get name ) --project (projects | get 0 | get name ) --save --default-bucket bot --default-scope public --username cbsh --password Couch123#
+Couchbase Shell is a direct way to interact with your Couchbase Clusters, allowing you to configure, 
 
-credentials create --read --write --username cbsh --password Couch123# 
+1. open `~/.cbsh/config` and edit this file with the following content:
+
+```
+version = 1
+llms = []
+
+[[capella-organization]]
+identifier = "yourOrgIdentifier"
+access-key = "yourAccessKey"
+secret-key = "yourSecretKey"
+default-project = "Trial - Project"
+
+```
+
+2. Run `cbsh` in the terminal to open [Couchbase Shell](https://couchbase.sh).
+
+3. Register your trial cluster by running `clusters | clusters get $in.0.name | cb-env register $in.name $in."connection string" --capella-organization "yourOrgIdentifier" --project "Trial - Project" --save --default-bucket bot --default-scope public --username cbsh --password yourPassword`
+
+4. Verify `~/.cbsh/config` has ben modified. It should contains the cluster definition. From there copy the cluster identifier and run `cb-env cluster clusterIdentifier`. This will tell cbsh that the default cluster for all future operations in this session is your cluster.
+
+5. Create the corresponding credentials `credentials create --read --write --username cbsh --password yourPassword`
 
 
-## Create a Bucket
+## Configure your Cluster
 
 After creating a cluster, you can create a new bucket by following the steps below:
 
@@ -78,4 +96,27 @@ Create a `.env` file in the root directory and add your OpenAI API key:
 OPENAI_API_KEY=your_openai_api_key
 ```
 
+OpenAI must also be configured for Couchbase Shell, add the following block to `~/.cbsh/config`
+```
+[[llm]]
+identifier = "OpenAI-small"
+provider = "OpenAI"
+embed_model = "text-embedding-3-small"
+chat_model = "gpt-3.5-turbo"
+api_key = "get-your-own"
+```
+
 You can get your API key from the [OpenAI API dashboard](https://platform.openai.com/api-keys).
+
+### Import Data
+
+Run cbsh and source the `importers.nu` file.
+```
+source importers.nu
+import_markdown_in_folder ../content/files/en-us/glossary/ "glossary "a glossary of IT terms"
+let query = "Your question about something in the glossary"
+let vectorized_query = $query | vector enrich-text 
+let context = vector search documentation vector $question.content.vector.0 | get id | subdoc  get content | select content
+$context | ask $question.content.text.0
+```
+Here the content folder is a local clone of Mozilla Developer network.
