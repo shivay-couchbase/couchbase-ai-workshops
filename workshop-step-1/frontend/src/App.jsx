@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ChatWindow from './components/ChatWindow'
 import Header from './components/Header'
+import SystemPrompt from './components/SystemPrompt'
 import './App.css'
 
 function App() {
@@ -13,7 +14,25 @@ function App() {
     }
   ])
 
+  const defaultSystemPrompt = "You are a helpful AI assistant. Please respond to the user's message in a friendly and helpful manner. Keep your responses concise but informative."
+  
   const [isLoading, setIsLoading] = useState(false)
+  const [systemPrompt, setSystemPrompt] = useState(defaultSystemPrompt)
+  const [showSystemPrompt, setShowSystemPrompt] = useState(false)
+
+  // Load system prompt from localStorage on component mount
+  useEffect(() => {
+    const savedSystemPrompt = localStorage.getItem('chatapp-system-prompt')
+    if (savedSystemPrompt) {
+      setSystemPrompt(savedSystemPrompt)
+    }
+  }, [])
+
+  // Save system prompt to localStorage whenever it changes
+  const handleSystemPromptChange = (newPrompt) => {
+    setSystemPrompt(newPrompt)
+    localStorage.setItem('chatapp-system-prompt', newPrompt)
+  }
 
   const sendMessage = async (messageText) => {
     const userMessage = {
@@ -32,7 +51,10 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: messageText }),
+        body: JSON.stringify({ 
+          message: messageText,
+          systemPrompt: systemPrompt 
+        }),
       })
 
       if (!response.ok) {
@@ -70,6 +92,13 @@ function App() {
         messages={messages} 
         onSendMessage={sendMessage}
         isLoading={isLoading}
+      />
+      <SystemPrompt 
+        systemPrompt={systemPrompt}
+        onSystemPromptChange={handleSystemPromptChange}
+        isVisible={showSystemPrompt}
+        onToggleVisibility={() => setShowSystemPrompt(!showSystemPrompt)}
+        defaultSystemPrompt={defaultSystemPrompt}
       />
     </div>
   )

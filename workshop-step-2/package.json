@@ -7,7 +7,7 @@
         "start": "node server.js",
         "test": "jest"
     },
-    "author": "Ben Greenberg",
+    "author": "Couchbase",
     "license": "MIT",
     "repository": {
         "type": "git",

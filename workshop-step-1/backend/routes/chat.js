@@ -6,7 +6,7 @@ const router = express.Router()
 // POST /api/chat - Send message to OpenAI and get response
 router.post('/chat', async (req, res) => {
   try {
-    const { message } = req.body
+    const { message, systemPrompt } = req.body
 
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ 
@@ -21,9 +21,10 @@ router.post('/chat', async (req, res) => {
     }
 
     console.log(`📨 Received message: ${message}`)
+    console.log(`⚙️ System prompt: ${systemPrompt ? systemPrompt.substring(0, 50) + '...' : 'Default'}`)
     
-    // Generate response using Gemini
-    const response = await generateResponse(message)
+    // Generate response using OpenAI with system prompt
+    const response = await generateResponse(message, systemPrompt)
     
     console.log(`🤖 Generated response: ${response.substring(0, 100)}...`)
     

@@ -88,6 +88,23 @@ Send a message to the chatbot and receive an AI-generated response.
 }
 ```
 
+## System Prompt Configuration
+
+The chat application includes a system prompt feature that allows you to customize how the OpenAI API behaves:
+
+### How to Use
+1. Click the **"⚙️ System Prompt"** button in the top-right corner
+2. Choose from 6 pre-built templates or create your own custom prompt
+3. Click **"Save"** to apply your changes
+
+### Available Templates
+- **Default Assistant** - General-purpose helpful AI
+- **Code Helper** - Programming and coding assistance  
+- **Creative Writer** - Storytelling and creative writing
+- **Business Advisor** - Strategic business consultation
+- **Educational Tutor** - Patient teaching and learning support
+- **Technical Documentarian** - Clear technical documentation
+
 ## Next Steps
 
 Congratulations! You've successfully built a working AI chatbot.

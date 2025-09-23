@@ -6,9 +6,10 @@ let openai = null
 /**
  * Generate a response using OpenAI GPT
  * @param {string} userMessage - The user's input message
+ * @param {string} systemPrompt - Optional system prompt to override default
  * @returns {Promise<string>} - The AI generated response
  */
-export async function generateResponse(userMessage) {
+export async function generateResponse(userMessage, systemPrompt = null) {
   try {
     // Check if API key is configured
     console.log('OPENAI_API_KEY check:', process.env.OPENAI_API_KEY ? 'Set' : 'Not set')
@@ -23,10 +24,9 @@ export async function generateResponse(userMessage) {
       })
     }
 
-    // Create a prompt for the AI
-    const prompt = `You are a helpful AI assistant. Please respond to the user's message in a friendly and helpful manner. Keep your responses concise but informative.
-
-User message: ${userMessage}`
+    // Use provided system prompt or default
+    const defaultSystemPrompt = "You are a helpful AI assistant. Please respond to the user's message in a friendly and helpful manner. Keep your responses concise but informative."
+    const finalSystemPrompt = systemPrompt || defaultSystemPrompt
 
     // Generate content using OpenAI
     const completion = await openai.chat.completions.create({
@@ -34,7 +34,7 @@ User message: ${userMessage}`
       messages: [
         {
           role: "system",
-          content: "You are a helpful AI assistant. Please respond to the user's message in a friendly and helpful manner. Keep your responses concise but informative."
+          content: finalSystemPrompt
         },
         {
           role: "user",
