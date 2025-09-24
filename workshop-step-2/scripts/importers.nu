@@ -1,6 +1,7 @@
 use splitter_md.nu *
 use splitter_recursive.nu *
 use couchbase.nu *
+use embedding.nu *
 
 export def import_markdown_in_folder [
     path,
@@ -56,17 +57,10 @@ def import_documentation [
 def vectorize_chunk [
 ] {
     let strings = $in | reduce --fold [] { | it, acc| ( $acc | append ( $it.content  ) )  }
-    let url = "https://api.openai.com/v1/embeddings" 
-    let json = {
-        model: "text-embedding-3-small",
-        input: $strings
-    };
-    let response = ( http post  -e -f $url $json --headers ["Authorization" $"Bearer ($env.OPENAI_API_KEY) " ] --content-type "application/json")
-    let vectors = $response.body.data
-    let vectorized_chunks = $in | enumerate | each { |row| $row.item | insert id ( $row.item.content | hash sha256 ) | insert vector ( $vectors | get ($row.index) | get embedding ) }
+    let vectors = embed $strings --provider openai
+    let vectorized_chunks = $in | enumerate | each { |row| $row.item | insert id ( $row.item.content | hash sha256 ) | insert vector ( $vectors | get ($row.index)  ) }
     $vectorized_chunks
 }
-
 
 def epoch_now_nano [] {
     date now | date to-timezone GMT | into int
