@@ -15,7 +15,7 @@ export def search_documentation [
     query
 ] {
     let vectorized_query = $query | vector enrich-text 
-    vector search documentation vector $question.content.vector.0 | get id | subdoc  get content | select content
+    vector search documentation vector $vectorized_query.content.vector.0 | get id | subdoc  get content | select content
 }
 
 
