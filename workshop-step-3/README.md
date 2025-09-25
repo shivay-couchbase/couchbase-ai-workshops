@@ -86,11 +86,47 @@ Verify you have your OpenAI API key defined in `.env` file in the `backend` dire
 OPENAI_API_KEY=your-api-key
 ```
 
+## Semantic Cache Implementation
+
+This workshop now includes semantic caching to improve performance and reduce costs. The cache stores LLM responses based on semantic similarity of queries.
+
+### Setup Semantic Cache
+
+The manual setup will provide step-by-step instructions to:
+1. Create the `semantic_cache` bucket in Capella dashboard
+2. Create the `semantic` collection
+3. Create the search index with the provided configuration
+
+**Test the cache:**
+```bash
+npm run test-cache
+```
+
+### Cache Features
+
+- **Semantic Similarity**: Similar queries (even with different wording) retrieve cached responses
+- **LLM Signature Matching**: Responses are cached per model configuration
+- **TTL Support**: Automatic cache expiration
+- **Performance Monitoring**: Built-in logging for cache hits/misses
+
+For detailed information, see [SEMANTIC_CACHE_README.md](./SEMANTIC_CACHE_README.md).
+
 ## Run and Test the Application
 
 Once everything is connected, you can run both the frontend and backend together:
 
-1. Ensure the backend (node server.js in backend) and frontend (npm run dev in frontend) servers are running.
-2. Visit the frontend URL in your browser.
-3. Enter a query and submit it.
-4. Frontend displays the response.
+1. **Setup cache (first time only):**
+   ```bash
+   cd backend
+   npm run setup-cache
+   ```
+
+2. **Start the application:**
+   - Backend: `cd backend && npm start`
+   - Frontend: `cd frontend && npm run dev`
+
+3. **Test the application:**
+   - Visit the frontend URL in your browser
+   - Enter a query and submit it
+   - Try similar queries to see cache hits in the console logs
+   - Frontend displays the response
