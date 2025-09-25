@@ -24,6 +24,7 @@ export def embed [
   content,                        # support string or list<string>
   --provider:string = "openai",   # gemini | voyage | cohere | ollama | openai 
   --model:string,                 # optional model override
+  --dimensions:int            # optional dimension of the vector
   --task:string                   # optional task hint (cohere input_type, gemini taskType, etc.)
 ] {
 
@@ -32,15 +33,15 @@ export def embed [
       # Gemini: https://generativelanguage.googleapis.com
       if ($env.GEMINI_API_KEY | default "" | is-empty) { error make { msg: "Set GEMINI_API_KEY" } }
       let mdl = ($model | default "models/gemini-embedding-001")
+      let dimensions = ($dimensions | default 1536)
       let content_type = $content | describe 
       let $content = match $content_type {
-        "string" =>  [ (gemini_content_format $content $mdl) ]
-        "list<string>" => ( $content | each { |t|  gemini_content_format $t $mdl }   )
+        "string" =>  [ (gemini_content_format $content $mdl $dimensions) ]
+        "list<string>" => ( $content | each { |t|  gemini_content_format $t $mdl $dimensions}   )
         _ => { error make { msg: "Content was neither a string or list of string" }}
       }
 
-      let body = { requests : $content
-      }
+      let body = { requests : $content}
       http post -H [
         "x-goog-api-key" $env.GEMINI_API_KEY,
         "Content-Type" "application/json"
@@ -51,8 +52,9 @@ export def embed [
     "voyage" => {
       # Voyage: https://api.voyageai.com/v1/embeddings
       if ($env.VOYAGE_API_KEY | default "" | is-empty) { error make { msg: "Set VOYAGE_API_KEY" } }
+      let dimensions = ($dimensions | default 1024)
       let mdl = ($model | default "voyage-3.5")
-      let body = { model: $mdl, input: $content, "input_type": "document"  }
+      let body = { output_dimension:$dimensions, model: $mdl, input: $content, "input_type": "document"  }
       http post -H [
         "Authorization" $"Bearer ($env.VOYAGE_API_KEY)",
         "Content-Type" "application/json"
@@ -63,6 +65,7 @@ export def embed [
     "cohere" => {
       # Cohere: https://api.cohere.com/v1/embeddings
       if ($env.COHERE_API_KEY | default "" | is-empty) { error make { msg: "Set COHERE_API_KEY" } }
+      let dimensions = ($dimensions | default 1536)
       let content_type = $content | describe 
       let $content = match $content_type {
         "string" => [ $content ]
@@ -71,7 +74,7 @@ export def embed [
       }
       let mdl = ($model | default "embed-english-v3.0")
       let itype = ($task | default "classification")
-      let body = { model: $mdl, texts: $content , input_type: $itype, truncate: "NONE" }
+      let body = {output_dimension:$dimensions, model: $mdl, texts: $content , input_type: $itype, truncate: "NONE" }
       http post -H [
         "Authorization" $"Bearer ($env.COHERE_API_KEY)",
         "Content-Type" "application/json"
@@ -91,8 +94,9 @@ export def embed [
     "openai" => {
       # OpenAI: https://api.openai.com/v1/embeddings
       if ($env.OPENAI_API_KEY | default "" | is-empty) { error make { msg: "Set OPENAI_API_KEY" } }
+      let dimensions = ($dimensions | default 1536)
       let mdl = ($model | default "text-embedding-3-small")
-      let body = { input: $content, model: $mdl }
+      let body = { dimensions: $dimensions, input: $content, model: $mdl }
       http post -H [
         "Authorization" $"Bearer ($env.OPENAI_API_KEY)",
         "Content-Type" "application/json"
@@ -108,6 +112,7 @@ export def embed [
 def gemini_content_format [
   text
   model
+  dimensions
 ] {
     {
       "model": $model,
@@ -115,6 +120,7 @@ def gemini_content_format [
         "parts":[{
           "text": $text
           }]
-      }, 
+      },
+      "output_dimensionality": $dimensions 
     }
 }
