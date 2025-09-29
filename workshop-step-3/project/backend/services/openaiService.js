@@ -3,7 +3,7 @@ import openai from 'openai'
 dotenv.config();
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-const OPENAI_EMBEDDING_MODEL = 'text-embedding-ada-002'
+const OPENAI_EMBEDDING_MODEL = 'text-embedding-3-small'
 const OPENAI_COMPLETION_MODEL = 'gpt-4o-mini'
 
 const openaiclient = new openai.OpenAI({ apiKey: OPENAI_API_KEY });
