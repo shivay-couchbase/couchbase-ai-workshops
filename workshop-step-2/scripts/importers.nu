@@ -44,6 +44,8 @@ def import_documentation [
  let now = epoch_now_nano
  let meta = $meta | insert date $now
  let filepath = $"($meta.name)-($now).json"
+ let metaId = $"meta::($meta.name)"
+ let vectorized_chunked_files = $vectorized_chunked_files | each { |c|  ( $c | insert metaId $metaId ) }
  $vectorized_chunked_files | save -f $filepath
  let structure = match $visibility {
     "private" => {bucket: $storageconfig.private_bucket, tenant: get_private_scope }
@@ -51,7 +53,7 @@ def import_documentation [
  }
  create_collection_if_not_exist  $structure.bucket $structure.tenant $storageconfig.documentation_collection
  doc import --bucket $structure.bucket --scope $structure.tenant --collection $storageconfig.documentation_collection --id-column id $filepath
- doc upsert --bucket $structure.bucket --scope $structure.tenant --collection $storageconfig.documentation_collection $"meta::($meta.name)" $meta
+ doc insert --bucket $structure.bucket --scope $structure.tenant --collection $storageconfig.documentation_collection $metaId $meta
 }
 
 def vectorize_chunk [
