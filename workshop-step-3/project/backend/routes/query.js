@@ -10,11 +10,12 @@ router.post('/', async (req, res) => {
   if (!q || q.trim() === '') {
     return res.status(400).json({ error: 'Query is required.' })
   }
+  const { name } = req.query
 
   try {
     const embedding = await getEmbedding(q)
 
-    const documents = await getRelevantDocuments(embedding)
+    const documents = await getRelevantDocuments(embedding, name)
 
     // Step 3: Construct the prompt with document info
     const documentList = documents.map((doc, index) => 

@@ -10,6 +10,9 @@ const {
   COUCHBASE_SEARCH_INDEX_NAME
 } = process.env
 
+const COUCHBASE_SCOPE_NAME = 'public'
+const full_idx_name = `${COUCHBASE_BUCKET_NAME}.${COUCHBASE_SCOPE_NAME}.${COUCHBASE_SEARCH_INDEX_NAME}`
+
 let cluster
 
 async function initCouchbase() {
@@ -21,6 +24,49 @@ async function initCouchbase() {
     })
   }
   return cluster
+}
+
+export async function getRelevantDocumentIdsBySourceName(embedding, sourceName) {
+  const cluster = await initCouchbase()
+  const scope = cluster.bucket(COUCHBASE_BUCKET_NAME).scope(COUCHBASE_SCOPE_NAME);
+  
+   const query = `
+    SELECT SEARCH_META(d.out) hits FROM \`documentation\` d
+    JOIN \`documentation\` m ON d.metaId = META(m).id
+    WHERE m.name=$SOURCE AND
+      SEARCH(\`d\`, {
+      "query": {
+          "match_none": {}
+      },
+      "knn": [
+        {
+          "k": 4,
+          "field": "vector",
+          "vector": $VECTOR
+        }
+      ]
+    },
+    {
+    "index" : "${full_idx_name}"
+    }
+   )
+  `
+  const options = { parameters: { SOURCE: sourceName, VECTOR: embedding, COUCHBASE_SEARCH_INDEX_NAME : full_idx_name } }
+
+  const result = await scope.query(query, options)
+  
+  result.rows.slice(0, 3).forEach((row, index) => {
+    console.log(`${index + 1}. ID: ${row.hits.id}`)
+    console.log(`   Score: ${row.hits.score.toFixed(4)}`)
+    console.log(`   ---`)
+  })
+
+  return result.rows.map(row => {
+    return {
+        id: row.hits.id,
+        score: row.hits.score
+    };
+  });
 }
 
 export async function getRelevantDocumentIds(embedding) {
@@ -49,7 +95,7 @@ export async function getRelevantDocumentIds(embedding) {
   });
 }
 
-export async function getRelevantDocuments(embedding) {
+export async function getRelevantDocuments(embedding, name) {
   const cluster = await initCouchbase();
   const bucket = cluster.bucket(COUCHBASE_BUCKET_NAME);
   
@@ -61,8 +107,12 @@ export async function getRelevantDocuments(embedding) {
     console.log('📄 Falling back to default collection')
     collection = bucket.defaultCollection();
   }
-
-  const storedEmbeddings = await getRelevantDocumentIds(embedding);
+let storedEmbeddings = []
+  if (!name || name.trim() === '') {
+    storedEmbeddings = await getRelevantDocumentIds(embedding);
+  } else {
+    storedEmbeddings = await getRelevantDocumentIdsBySourceName(embedding, name);
+  }
 
   console.log(`\n📄 Retrieving ${storedEmbeddings.length} documents...`)
 
